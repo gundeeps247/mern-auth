@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(false); {/*when sign up button is clicked it should be disabled and for showing loading effect and showing error*/ }
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })
@@ -27,6 +28,7 @@ export default function SignUp() {
         setError(true);
         return;
       }
+      navigate('/sign-in')
     } catch (error) {
       setLoading(false);
       setError(true)
