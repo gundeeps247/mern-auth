@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(false); {/*when sign up button is clicked it should be disabled and for showing loading effect and showing error*/ }
-  const [loading, setLoading] = useState(false);
+  const{loading,error} =useSelector((state) => state.user)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })
@@ -13,8 +15,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault(); {/*Prevent refreshing the page when we submit the form*/ }
     try {
-      setLoading(true);
-      setError(false)
+      dispatch(signInStart())
       const res = await fetch('/backend/auth/signin', {
         method: 'POST',
         headers: {
@@ -23,15 +24,14 @@ export default function SignIn() {
         body: JSON.stringify(formData),
       })
       const data = await res.json();
-      setLoading(false);
-      if(data.success === false){
-        setError(true);
+      if (data.success === false) {
+       dispatch(signInFailure(data))
         return;
       }
+      dispatch(signInSuccess(data))
       navigate('/')
     } catch (error) {
-      setLoading(false);
-      setError(true)
+      dispatch(signInFailure(error))
     }
   }
   return (
@@ -40,7 +40,7 @@ export default function SignIn() {
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input type="email" placeholder='Email' id='email' className='bg-slate-100 p-3 rounded-lg' onChange={handleChange} />
         <input type="password" placeholder='Password' id='password' className='bg-slate-100 p-3 rounded-lg' onChange={handleChange} />
-        <button disabled={loading} className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>{loading ? 'Loading...':'Sign In'}</button>
+        <button disabled={loading} className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>{loading ? 'Loading...' : 'Sign In'}</button>
         {/*by default it has a type of submit */}
       </form>
       <div className='flex gap-2 mt-5'>
@@ -49,7 +49,7 @@ export default function SignIn() {
           <span className='text-blue-500'>Sign Up</span>
         </Link>
       </div>
-      <p className='text-red-700 mt-5'>{error && 'Something went wrong!'}</p>
+      <p className='text-red-700 mt-5'>{error ? error.message || 'Something went wrong!': ''}</p>
     </div>
   )
 }
