@@ -1,3 +1,5 @@
+//these are just the functions we use to replace the already existing functionality for redux toolkit, i.e. we can access our user's data anywhere in our app 
+
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
