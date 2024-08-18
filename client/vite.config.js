@@ -7,7 +7,7 @@ export default defineConfig({
   server:{
     proxy: {
       '/backend':{
-        target:'http://localhost:3000',
+        target:'https://mern-auth-tawny.vercel.app',
         secure: false,
       },
     }
