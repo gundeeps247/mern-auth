@@ -96,7 +96,7 @@ export default function Profile() {
             <span className='text-green-700'>Image Uploaded Successfully</span>
           ) : ''}
         </p>
-
+        
         <input defaultValue={currentUser.username} type="text" id="username" placeholder="Username" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
         <input defaultValue={currentUser.email} type="email" id="email" placeholder="Email" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
         <input type="password" id="password" placeholder="Password" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
