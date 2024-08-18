@@ -22,13 +22,13 @@ app.listen(3000, () => {
 
 const __dirname = path.resolve();
 
-const app = express();
+// const app = express();
 
-app.use(express.static(path.join(__dirname, 'client/dist')));
+// app.use(express.static(path.join(__dirname, 'client/dist')));
 
-app.get('*', (req,res) => {
-    res.sendFile(path.join(__dirname, 'client','dist','index.html'))
-})
+// app.get('*', (req,res) => {
+//     res.sendFile(path.join(__dirname, 'client','dist','index.html'))
+// })
 
 app.use(express.json());
 
