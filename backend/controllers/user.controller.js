@@ -15,6 +15,7 @@ export const updateUser = async (req, res, next) => {
     return next(errorHandler(401, 'You can update only your account!'));
   }
   try {
+    console.log("Request body:", req.body); // Log the incoming data
     if (req.body.password) {
       req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
@@ -31,12 +32,15 @@ export const updateUser = async (req, res, next) => {
       },
       { new: true }
     );
+    console.log("Updated user:", updatedUser); // Log the updated user data
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
+    console.error("Error in updateUser:", error); // Log the error
     next(error);
   }
 };
+
 
 
 // delete user
