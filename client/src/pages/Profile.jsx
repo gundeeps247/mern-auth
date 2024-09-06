@@ -1,55 +1,133 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
-import { useDispatch } from 'react-redux';
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserFailure, deleteUserSuccess, signOut } from '../redux/user/userSlice';
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserFailure,
+  deleteUserSuccess,
+  signOut
+} from '../redux/user/userSlice';
 
 export default function Profile() {
   const dispatch = useDispatch();
   const fileRef = useRef(null);
-  const [image, setImage] = useState(undefined);
-  const [imagePercent, setImagepercent] = useState(0);
+  const pdfRef = useRef(null);
+  const [image, setImage] = useState(null);
+  const [pdf, setPdf] = useState(null);
+  const [imagePercent, setImagePercent] = useState(0);
+  const [pdfPercent, setPdfPercent] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
   const [formData, setFormData] = useState({});
-  const [updateSucsess, setUpdateSucess] = useState(false)
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [pdfUrls, setPdfUrls] = useState([]);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
 
   const { currentUser, loading, error } = useSelector(state => state.user);
 
   useEffect(() => {
     if (image) {
-      handleFileUpload(image);
+      handleFileUpload(image, 'profilePicture');
     }
   }, [image]);
 
-  const handleFileUpload = async (image) => {
+  useEffect(() => {
+    if (pdf) {
+      handleFileUpload(pdf, 'pdfFile');
+    }
+  }, [pdf]);
+
+  useEffect(() => {
+    console.log(currentUser);
+    if (currentUser?.pdfUrls) {
+      setPdfUrls(currentUser.pdfUrls);
+    }
+  }, [currentUser]);
+
+  const handleFileUpload = async (file, type) => {
     const storage = getStorage(app);
-    const fileName = new Date().getTime() + image.name;
+    const fileName = `${Date.now()}_${file.name}`;
     const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, image);
+    const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
       'state_changed',
       (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImagepercent(Math.round(progress));
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        if (type === 'profilePicture') {
+          setImagePercent(progress);
+        } else if (type === 'pdfFile') {
+          setPdfPercent(progress);
+        }
       },
       (error) => {
-        setImageError(true);
+        if (type === 'profilePicture') {
+          setImageError(true);
+        } else if (type === 'pdfFile') {
+          setPdfError(true);
+        }
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setFormData({
-            ...formData,
-            profilePicture: downloadURL,
-          })
-        );
+        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+          if (type === 'pdfFile') {
+            try {
+              const res = await fetch(`/backend/user/upload/pdf/${currentUser._id}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${currentUser.token}`,
+                },
+                body: JSON.stringify({ downloadURL }),
+              });
+              const data = await res.json();
+              if (data.pdfUrls) {
+                setPdfUrls(data.pdfUrls);
+              }
+            } catch (error) {
+              console.error('Error updating PDF URLs:', error);
+            }
+          } else {
+            setFormData(prev => ({
+              ...prev,
+              [type]: downloadURL,
+            }));
+          }
+        });
       }
     );
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value})
+    setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
+  };
+
+  const handleAskQuestion = async () => {
+    try {
+      const response = await fetch('https://llm-1-yfad.onrender.com/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          pdf_urls: pdfUrls.join(','),  // Joining URLs into a comma-separated string
+          question: question
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAnswer(data.answer);
+    } catch (error) {
+      console.error('Error asking question:', error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -60,20 +138,26 @@ export default function Profile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser.token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          profilePicture: formData.profilePicture,
+          pdfFile: formData.pdfFile,
+        }),
       });
       const data = await res.json();
-      if (data.success === false) {
+      if (!data.success) {
         dispatch(updateUserFailure(data));
         return;
       }
       dispatch(updateUserSuccess(data));
-      setUpdateSucess(true);
+      setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error));
     }
   };
+
   const handleDeleteAccount = async () => {
     try {
       dispatch(deleteUserStart());
@@ -81,7 +165,7 @@ export default function Profile() {
         method: 'DELETE',
       });
       const data = await res.json();
-      if (data.success === false) {
+      if (!data.success) {
         dispatch(deleteUserFailure(data));
         return;
       }
@@ -94,45 +178,145 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       await fetch('/backend/auth/signout');
-      dispatch(signOut())
+      dispatch(signOut());
     } catch (error) {
-      console.log(error);
+      console.error('Error signing out:', error);
     }
   };
-  
 
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl text-center font-semibold my-7">Profile</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input type="file" ref={fileRef} hidden accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+        <input
+          type="file"
+          ref={fileRef}
+          hidden
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
         <img
           src={formData.profilePicture || currentUser.profilePicture}
           alt="profile"
           className="h-24 w-24 self-center cursor-pointer rounded-full object-cover mt-2"
           onClick={() => fileRef.current.click()}
         />
-        <p className='text-sm self-center'>
+        <p className="text-sm self-center">
           {imageError ? (
-            <span className='text-red-700'>Error uploading image</span>
+            <span className="text-red-700">Error uploading image</span>
           ) : imagePercent > 0 && imagePercent < 100 ? (
-            <span className='text-slate-700'>{`Uploading:  ${imagePercent} %`}</span>
+            <span className="text-slate-700">{`Uploading image: ${imagePercent}%`}</span>
           ) : imagePercent === 100 ? (
-            <span className='text-green-700'>Image Uploaded Successfully</span>
-          ) : ''}
+            <span className="text-green-700">Image Uploaded Successfully</span>
+          ) : (
+            ''
+          )}
         </p>
-        
-        <input defaultValue={currentUser.username} type="text" id="username" placeholder="Username" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
-        <input defaultValue={currentUser.email} type="email" id="email" placeholder="Email" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
-        <input type="password" id="password" placeholder="Password" className="bg-slate-100 rounded-lg p-3"onChange={handleChange} /> 
-        <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80">{loading ? 'Loading...': 'Update'}</button>
+
+        <input
+          defaultValue={currentUser.username}
+          type="text"
+          id="username"
+          placeholder="Username"
+          className="bg-slate-100 rounded-lg p-3"
+          onChange={handleChange}
+        />
+        <input
+          defaultValue={currentUser.email}
+          type="email"
+          id="email"
+          placeholder="Email"
+          className="bg-slate-100 rounded-lg p-3"
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          className="bg-slate-100 rounded-lg p-3"
+          onChange={handleChange}
+        />
+
+        <div className="mt-5">
+          <label className="block mb-2 font-semibold">Upload PDF</label>
+          <input
+            type="file"
+            ref={pdfRef}
+            accept="application/pdf"
+            onChange={(e) => setPdf(e.target.files[0])}
+          />
+        </div>
+        <p className="text-sm self-center mt-2">
+          {pdfError ? (
+            <span className="text-red-700">Error uploading PDF</span>
+          ) : pdfPercent > 0 && pdfPercent < 100 ? (
+            <span className="text-slate-700">{`Uploading PDF: ${pdfPercent}%`}</span>
+          ) : pdfPercent === 100 ? (
+            <span className="text-green-700">PDF Uploaded Successfully</span>
+          ) : (
+            null
+          )}
+        </p>
+
+
+        <button
+          type="submit"
+          className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+          disabled={loading}
+        >
+          {loading ? 'Loading...' : 'Update'}
+        </button>
       </form>
-      <div className="flex justify-between mt-5">
-        <span onClick={handleDeleteAccount} className="text-red-700 cursor-pointer">Delete Account</span>
-        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign Out</span>
-      </div>
-      <p className='text-red-700 mt-5'>{error && "Something went wrong"}</p>
-      <p className='text-green-700 mt-5'>{updateSucsess && "User is updated successfully"}</p>
+
+      <h2 className="text-xl mt-10 mb-5 font-semibold">Ask a Question</h2>
+      <input
+        type="text"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        className="w-full bg-slate-100 rounded-lg p-3 mb-4"
+        placeholder="Type your question here..."
+      />
+      <button
+        onClick={handleAskQuestion}
+        className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+      >
+        Ask
+      </button>
+
+      {answer && (
+        <div className="mt-5 p-4 bg-green-100 rounded-lg">
+          <h3 className="font-semibold">Answer:</h3>
+          <p>{answer}</p>
+        </div>
+      )}
+
+<div className="mt-10">
+  <h2 className="text-xl font-semibold mb-4">Uploaded PDFs:</h2>
+  <ul className="list-decimal ml-5">
+    {pdfUrls.map((url, index) => (
+      <li key={index} className="mb-2">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+          {`PDF ${index + 1}`}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+
+      <button
+        onClick={handleDeleteAccount}
+        className="mt-10 bg-red-600 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+      >
+        Delete Account
+      </button>
+
+      <button
+        onClick={handleSignOut}
+        className="mt-3 bg-slate-600 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+      >
+        Sign Out
+      </button>
     </div>
   );
 }
