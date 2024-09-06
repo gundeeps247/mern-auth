@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from 'path'; // Importing the 'path' module
 import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
 import { errorHandler } from './utils/error.js';
@@ -10,7 +11,7 @@ import { verifyToken } from './utils/verifyUser.js'; // Corrected path
 
 dotenv.config();
 
-const __dirname = path.resolve();
+const __dirname = path.resolve(); // Now 'path' is available
 
 const app = express();
 
