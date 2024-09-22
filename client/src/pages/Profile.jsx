@@ -1,6 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { Bar } from 'react-chartjs-2'; // Import Bar chart
+import {
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Chart as ChartJS,
+} from 'chart.js'; // Import necessary Chart.js components
 import { app } from '../firebase';
 import {
   updateUserStart,
@@ -11,6 +21,16 @@ import {
   deleteUserSuccess,
   signOut
 } from '../redux/user/userSlice';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -27,6 +47,7 @@ export default function Profile() {
   const [pdfUrls, setPdfUrls] = useState([]);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [chartData, setChartData] = useState(null); // State to store chart data
 
   const { currentUser, loading, error } = useSelector(state => state.user);
 
@@ -43,7 +64,7 @@ export default function Profile() {
   }, [pdf]);
 
   useEffect(() => {
-    console.log(currentUser);
+    // console.log(currentUser);
     if (currentUser?.pdfUrls) {
       setPdfUrls(currentUser.pdfUrls);
     }
@@ -107,26 +128,56 @@ export default function Profile() {
   };
 
   const handleAskQuestion = async () => {
+    console.log('PDF URLs:', pdfUrls);
     try {
-      const response = await fetch('https://llm-1-yfad.onrender.com/ask', {
+      const response = await fetch('https://major-extraction-and-comparison.onrender.com/search', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
-          pdf_urls: pdfUrls.join(','),  // Joining URLs into a comma-separated string
-          question: question
+        body: JSON.stringify({
+          term: question,
+          pdfUrls,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const data = await response.json();
-      setAnswer(data.answer);
+      
+      console.log('Backend response:', data);
+  
+      // Check if there is an error
+      if (data.error) {
+        setAnswer(data.error);  // Display the error message
+        setChartData(null); // Clear any existing chart data
+      } else {
+        setAnswer(data);  // Display the actual data if no error
+
+        // Prepare data for multiple test results
+        const labels = Object.keys(data);  // e.g., ['pdf1', 'pdf2']
+        const values = Object.values(data).map(value => parseFloat(value));  // Convert values to float
+        
+        // Update chart data
+        setChartData({
+          labels,
+          datasets: [
+            {
+              label: `${question} Levels`,
+              data: values,
+              backgroundColor: 'rgba(75, 192, 192, 0.6)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+          ],
+        });
+      }
     } catch (error) {
       console.error('Error asking question:', error);
+      setAnswer('An error occurred while processing your request.');
+      setChartData(null); // Clear any existing chart data
     }
   };
 
@@ -258,7 +309,6 @@ export default function Profile() {
           )}
         </p>
 
-
         <button
           type="submit"
           className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
@@ -283,26 +333,51 @@ export default function Profile() {
         Ask
       </button>
 
+      {/* Conditional rendering for the answer */}
       {answer && (
         <div className="mt-5 p-4 bg-green-100 rounded-lg">
           <h3 className="font-semibold">Answer:</h3>
-          <p>{answer}</p>
+          {typeof answer === 'string' ? (
+            <p>{answer}</p>
+          ) : (
+            <div>
+              <pre>{JSON.stringify(answer, null, 2)}</pre>
+            </div>
+          )}
+
+          {/* Render the chart if chartData is available */}
+          {chartData && (
+            <div className="mt-5">
+              <Bar 
+                data={chartData} 
+                options={{
+                  scales: {
+                    y: { beginAtZero: true }
+                  },
+                  responsive: true,
+                  plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: `${question} Levels Comparison` }
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
-<div className="mt-10">
-  <h2 className="text-xl font-semibold mb-4">Uploaded PDFs:</h2>
-  <ul className="list-decimal ml-5">
-    {pdfUrls.map((url, index) => (
-      <li key={index} className="mb-2">
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-          {`PDF ${index + 1}`}
-        </a>
-      </li>
-    ))}
-  </ul>
-</div>
-
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4">Uploaded PDFs:</h2>
+        <ul className="list-decimal ml-5">
+          {pdfUrls.map((url, index) => (
+            <li key={index} className="mb-2">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                {`PDF ${index + 1}`}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <button
         onClick={handleDeleteAccount}
