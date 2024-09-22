@@ -236,8 +236,11 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-3 max-w-lg mx-auto">
-      <h1 className="text-3xl text-center font-semibold my-7">Profile</h1>
+    <div 
+    className="bg-cover bg-center min-h-screen flex items-center justify-center" 
+    style={{ backgroundImage: `url('https://images.pexels.com/photos/48604/pexels-photo-48604.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')` }}>
+    <div className="bg-white bg-opacity-90 shadow-lg rounded-lg max-w-lg w-full p-8">
+      <h1 className="text-3xl text-center font-semibold mb-6">Profile</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="file"
@@ -392,6 +395,7 @@ export default function Profile() {
       >
         Sign Out
       </button>
+    </div>
     </div>
   );
 }
