@@ -80,3 +80,45 @@ export const uploadUserPdf = async (req, res, next) => {
   }
 };
 
+// Save comparison data
+export const saveComparison = async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(errorHandler(401, 'You can only update your own account!'));
+  }
+
+  try {
+    const { term, data } = req.body;
+    const userId = req.user.id;
+
+    // Find the user and push the new comparison
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { comparisons: { term, data } } },  // Push the new comparison
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: 'Comparison saved successfully.',
+      comparisons: updatedUser.comparisons,  // Return the updated comparisons
+    });
+  } catch (error) {
+    console.error('Error in saveComparison:', error);
+    next(error);
+  }
+};
+
+
+// Get user comparisons
+export const getUserComparisons = async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(errorHandler(401, 'You can only access your own account!'));
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    res.status(200).json(user.comparisons);
+  } catch (error) {
+    console.error('Error in getUserComparisons:', error);
+    next(error);
+  }
+};

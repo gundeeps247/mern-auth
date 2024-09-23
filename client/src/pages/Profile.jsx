@@ -51,6 +51,34 @@ export default function Profile() {
 
   const { currentUser, loading, error } = useSelector(state => state.user);
 
+  // State to hold previous comparisons
+  const [previousComparisons, setPreviousComparisons] = useState([]); // Initialize as an empty array
+
+  useEffect(() => {
+    const fetchComparisons = async () => {
+      try {
+        const response = await fetch(`/backend/user/comparisons/${currentUser._id}`, {
+          headers: {
+            'Authorization': `Bearer ${currentUser.token}`,
+          },
+        });
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPreviousComparisons(data);
+        } else {
+          setPreviousComparisons([]);  // Handle non-array responses
+        }
+      } catch (error) {
+        console.error('Error fetching comparisons:', error);
+        setPreviousComparisons([]);  // Fallback to an empty array in case of error
+      }
+    };
+    
+  
+    fetchComparisons();
+  }, [currentUser]);
+
+
   useEffect(() => {
     if (image) {
       handleFileUpload(image, 'profilePicture');
@@ -128,7 +156,6 @@ export default function Profile() {
   };
 
   const handleAskQuestion = async () => {
-    console.log('PDF URLs:', pdfUrls);
     try {
       const response = await fetch('https://major-extraction-and-comparison.onrender.com/search', {
         method: 'POST',
@@ -141,27 +168,17 @@ export default function Profile() {
         }),
       });
   
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
       const data = await response.json();
-      
-      console.log('Backend response:', data);
-  
-      // Check if there is an error
       if (data.error) {
-        setAnswer(data.error);  // Display the error message
-        setChartData(null); // Clear any existing chart data
+        setAnswer(data.error);
+        setChartData(null);
       } else {
-        setAnswer(data);  // Display the actual data if no error
-
-        // Prepare data for multiple test results
-        const labels = Object.keys(data);  // e.g., ['pdf1', 'pdf2']
-        const values = Object.values(data).map(value => parseFloat(value));  // Convert values to float
-        
-        // Update chart data
-        setChartData({
+        setAnswer(data);
+  
+        const labels = Object.keys(data);
+        const values = Object.values(data).map(value => parseFloat(value));
+  
+        const newChartData = {
           labels,
           datasets: [
             {
@@ -172,14 +189,29 @@ export default function Profile() {
               borderWidth: 1,
             },
           ],
+        };
+  
+        setChartData(newChartData);
+  
+        // Save comparison to backend
+        await fetch(`/backend/user/save-comparison/${currentUser._id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentUser.token}`,
+          },
+          body: JSON.stringify({
+            term: question,
+            data: newChartData,
+          }),
         });
       }
     } catch (error) {
       console.error('Error asking question:', error);
       setAnswer('An error occurred while processing your request.');
-      setChartData(null); // Clear any existing chart data
+      setChartData(null);
     }
-  };
+  };  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -395,6 +427,15 @@ export default function Profile() {
       >
         Sign Out
       </button>
+    </div>
+    <h2 className="text-xl mt-10 mb-5 font-semibold">Previous Comparisons</h2>
+    <div>
+      {previousComparisons.map((comparison, index) => (
+        <div key={index}>
+          <h3>{comparison.term}</h3>
+          <Bar data={comparison.data} options={{ responsive: true }} />
+        </div>
+      ))}
     </div>
     </div>
   );
