@@ -1,0 +1,155 @@
+/* Profile Container */
+.bg-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f0f4f8;
+  }
+  
+  /* Main Profile Box */
+  .bg-white {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background-color: #ffffff;
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  
+  .bg-white:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Form Styling */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Profile Image */
+  img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  img:hover {
+    transform: scale(1.1);
+  }
+  
+  /* File Input */
+  input[type="file"] {
+    display: block;
+    font-size: 14px;
+    margin: 0 auto;
+    padding: 8px;
+    background: #e7e9ec;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  /* Button & Input Styles */
+  button, input, label {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  
+  /* Button Styles */
+  button {
+    background-color: #3490dc;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  button:hover {
+    background-color: #2779bd;
+  }
+  
+  .bg-blue-500 {
+    margin-top: 8px;
+  }
+  
+  /* Previous Comparisons Section */
+  .previous-comparisons {
+    width: 100%;
+    max-width: 500px;
+    background-color: #fafafa;
+    margin-top: 32px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+  }
+  
+  .previous-comparisons h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  /* Chart Container */
+  .chart-container {
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 16px;
+  }
+  
+  /* Media Queries */
+  @media only screen and (max-width: 768px) {
+    .bg-white, .chart-container, .previous-comparisons {
+      width: 90%;
+      padding: 20px;
+    }
+  
+    img {
+      width: 100px;
+      height: 100px;
+    }
+  
+    button, input, label {
+      font-size: 14px;
+      padding: 12px;
+    }
+  
+    form {
+      gap: 12px;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .bg-white, .chart-container, .previous-comparisons {
+      width: 100%;
+      padding: 16px;
+    }
+  
+    img {
+      width: 80px;
+      height: 80px;
+    }
+  
+    button, input, label {
+      font-size: 13px;
+      padding: 10px;
+    }
+  
+    form {
+      gap: 10px;
+    }
+  }
+  
