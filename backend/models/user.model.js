@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const comparisonSchema = new mongoose.Schema({
   term: { type: String, required: true }, // Search term
   data: { type: Object, required: true },  // The comparison data or chart data
-  date: { type: Date, default: Date.now }  // Timestamp
+  date: { type: Date, default: Date.now , required: true}  // Timestamp
 });
 
 const userSchema = new mongoose.Schema({
@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
 
 const User = mongoose.model('User', userSchema);
 
