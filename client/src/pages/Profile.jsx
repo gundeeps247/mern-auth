@@ -172,7 +172,7 @@ export default function Profile() {
   const handleAskQuestion = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/search",
+        "https://major-extraction-and-comparison.onrender.com/search",
         {
           method: "POST",
           headers: {
