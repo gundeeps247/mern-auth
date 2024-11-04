@@ -7,7 +7,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { Bar } from "react-chartjs-2"; // Import Bar chart
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   CategoryScale,
   LinearScale,
@@ -288,13 +288,8 @@ export default function Profile() {
   };
 
   const handleAskllm = () => {
-    try {
-      // Replace the fetch call with window.location to navigate to x.com
-      window.location.href = "https://health-matrix-llm.vercel.app/";
-    } catch (error) {
-      console.error("Error navigating to the website:", error);
-    }
-  };  
+    navigate("/medical-query");
+  };
 
   return (
     <div
