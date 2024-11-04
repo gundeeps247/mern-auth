@@ -58,7 +58,7 @@ export default function MedicalQueryProcessor() {
       const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-large", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer YOUR_HUGGINGFACE_API_KEY",
+          "Authorization": "Bearer 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",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
