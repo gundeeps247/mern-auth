@@ -394,7 +394,7 @@ export default function Profile() {
           onClick={handleAskllm}
           className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
         >
-          Ask LLM
+          Ask Remedies
         </button>
         {loadingAnswer && (
           <div className="text-center text-blue-500 mt-4">Loading answer...</div>
