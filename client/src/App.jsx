@@ -7,11 +7,11 @@ import Profile from "./pages/Profile"
 import Header from "./components/Header"
 import PrivateRoute from "./components/PrivateRoute"
 import Comparisons from "./pages/PreviousComparisons";
-
+import MedicalQueryProcessor from "./components/MedicalQueryProcessor";
 function App() {
   return (
     <BrowserRouter>
-      {/*header*/}
+      {/header/}
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -21,6 +21,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/comparisons" element={<Comparisons/>} />
+          <Route path="/medical-query" element={<MedicalQueryProcessor />} />
         </Route>
       </Routes>
     </BrowserRouter>
