@@ -56,6 +56,7 @@ export default function Profile() {
   const [answer, setAnswer] = useState("");
   const [chartData, setChartData] = useState(null); // State to store chart data
   const navigate = useNavigate();
+  const [loadingAnswer, setLoadingAnswer] = useState(false); // Loading state for answers
 
   const { currentUser, loading, error } = useSelector((state) => state.user);
 
@@ -170,6 +171,7 @@ export default function Profile() {
   };
 
   const handleAskQuestion = async () => {
+    setLoadingAnswer(true); // Set loading to true before fetching
     try {
       const response = await fetch(
         "https://major-extraction-and-comparison.onrender.com/search",
@@ -228,6 +230,7 @@ export default function Profile() {
       setAnswer("An error occurred while processing your request.");
       setChartData(null);
     }
+    setLoadingAnswer(false); // Set loading to false after fetching
   };
 
   const handleSubmit = async (e) => {
@@ -284,38 +287,47 @@ export default function Profile() {
     }
   };
 
+  const handleAskllm = () => {
+    try {
+      // Replace the fetch call with window.location to navigate to x.com
+      window.location.href = "https://health-matrix-llm.vercel.app/";
+    } catch (error) {
+      console.error("Error navigating to the website:", error);
+    }
+  };  
+
   return (
-    <div 
-    className="bg-cover bg-center min-h-screen flex items-center justify-center" 
-    style={{ backgroundImage: `url('https://images.pexels.com/photos/48604/pexels-photo-48604.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')` }}>
-    <div className="bg-white bg-opacity-90 shadow-lg rounded-lg max-w-lg w-full p-8">
-      <h1 className="text-3xl text-center font-semibold mb-6">Profile</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
-          type="file"
-          ref={fileRef}
-          hidden
-          style={{ display: "none" }}
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-        <img
-          src={formData.profilePicture || currentUser.profilePicture}
-          alt="profile"
-          className="h-24 w-24 self-center cursor-pointer rounded-full object-cover mt-2"
-          onClick={() => fileRef.current.click()}
-        />
-        <p className="text-sm self-center">
-          {imageError ? (
-            <span className="text-red-700">Error uploading image</span>
-          ) : imagePercent > 0 && imagePercent < 100 ? (
-            <span className="text-slate-700">{`Uploading image: ${imagePercent}%`}</span>
-          ) : imagePercent === 100 ? (
-            <span className="text-green-700">Image Uploaded Successfully</span>
-          ) : (
-            ''
-          )}
-        </p>
+    <div
+      className="bg-cover bg-center min-h-screen flex items-center justify-center"
+      style={{ backgroundImage: `url('https://images.pexels.com/photos/48604/pexels-photo-48604.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')` }}>
+      <div className="bg-white bg-opacity-90 shadow-lg rounded-lg max-w-lg w-full p-8">
+        <h1 className="text-3xl text-center font-semibold mb-6">Profile</h1>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input
+            type="file"
+            ref={fileRef}
+            hidden
+            style={{ display: "none" }}
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+          <img
+            src={formData.profilePicture || currentUser.profilePicture}
+            alt="profile"
+            className="h-24 w-24 self-center cursor-pointer rounded-full object-cover mt-2"
+            onClick={() => fileRef.current.click()}
+          />
+          <p className="text-sm self-center">
+            {imageError ? (
+              <span className="text-red-700">Error uploading image</span>
+            ) : imagePercent > 0 && imagePercent < 100 ? (
+              <span className="text-slate-700">{`Uploading image: ${imagePercent}%`}</span>
+            ) : imagePercent === 100 ? (
+              <span className="text-green-700">Image Uploaded Successfully</span>
+            ) : (
+              ''
+            )}
+          </p>
 
           <input
             defaultValue={currentUser.username}
@@ -383,6 +395,15 @@ export default function Profile() {
         >
           Ask
         </button>
+        <button
+          onClick={handleAskllm}
+          className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+        >
+          Ask LLM
+        </button>
+        {loadingAnswer && (
+          <div className="text-center text-blue-500 mt-4">Loading answer...</div>
+        )}
 
         <button
           onClick={() => navigate("/comparisons")}
