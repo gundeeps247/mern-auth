@@ -58,7 +58,7 @@ export default function MedicalQueryProcessor() {
       const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-large", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer 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",
+          "Authorization": "Bearer YOUR_HUGGINGFACE_API_KEY",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -106,6 +106,9 @@ export default function MedicalQueryProcessor() {
         <button onClick={processQuery}>Submit</button>
         {loading && <div className="loading"><div className="spinner"></div> Processing...</div>}
         <div className="output">{typeof output === 'string' ? output : "Solution to your queries."}</div>
+        <div className="advisory-note">
+          <p>Please note: These results are AI-generated. For professional medical advice, consult a healthcare provider.</p>
+        </div>
       </div>
     </div>
   );
