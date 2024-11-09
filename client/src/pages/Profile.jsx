@@ -57,7 +57,9 @@ export default function Profile() {
   const [chartData, setChartData] = useState(null); // State to store chart data
   const navigate = useNavigate();
   const [loadingAnswer, setLoadingAnswer] = useState(false); // Loading state for answers
-
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
+  
   const { currentUser, loading, error } = useSelector((state) => state.user);
 
   // State to hold previous comparisons
@@ -107,6 +109,30 @@ export default function Profile() {
       setPdfUrls(currentUser.pdfUrls);
     }
   }, [currentUser]);
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window) {
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = "en-US";
+  
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setQuestion((prev) => prev + " " + transcript);
+        setIsRecording(false);
+      };
+  
+      recognitionRef.current.onerror = (error) => {
+        console.error("Speech recognition error", error);
+        setIsRecording(false);
+      };
+    }
+  }, []);
+  
+  const handleStartRecording = () => {
+    setIsRecording(true);
+    recognitionRef.current.start();
+  };
 
   const handleFileUpload = async (file, type) => {
     const storage = getStorage(app);
@@ -377,28 +403,43 @@ export default function Profile() {
         </form>
 
         <h2 className="text-xl mt-10 mb-5 font-semibold">Ask a Question</h2>
-        <input
-          type="text"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className="w-full bg-slate-100 rounded-lg p-3 mb-4"
-          placeholder="Type your question here..."
-        />
-        <button
-          onClick={handleAskQuestion}
-          className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
-        >
-          Ask
-        </button>
+<div className="relative w-full">
+  <input
+    type="text"
+    value={question}
+    onChange={(e) => setQuestion(e.target.value)}
+    className="w-full bg-slate-100 rounded-lg p-3 mb-4 pr-12"  // Extra padding on the right to avoid overlap with the button
+    placeholder="Type your question here..."
+  />
+  <button
+    onClick={handleStartRecording}
+    type="button"
+    className={`absolute right-1 top-1/2 transform -translate-y-[52%] rounded-full w-10 h-10 flex items-center justify-center ${
+      isRecording ? "bg-red-500 text-white" : "bg-blue-500 text-white"
+    }`}
+    style={{ right: "-1px", top: "calc(50% - 15px)" }}  // Additional adjustment
+  >
+    <i className="fas fa-microphone"></i>
+  </button>
+</div>
+<button
+  onClick={handleAskQuestion}
+  className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+>
+  Ask
+</button>
+
+{loadingAnswer && (
+          <div className="text-center text-blue-500 mt-4">Loading answer...</div>
+        )}
+
         <button
           onClick={handleAskllm}
           className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
         >
           Ask Remedies
         </button>
-        {loadingAnswer && (
-          <div className="text-center text-blue-500 mt-4">Loading answer...</div>
-        )}
+        
 
         <button
           onClick={() => navigate("/comparisons")}
