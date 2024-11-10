@@ -104,11 +104,7 @@ The backend handles user authentication, data storage, and file uploads. It prov
 
 <img width="337" alt="Screenshot 2024-11-06 at 7 22 26 PM" src="https://github.com/user-attachments/assets/45b1e79d-b538-4326-b1c1-8faf35fa00a4">
 
-> **Note**: To display images in the README on GitHub, ensure that the images are stored in an `assets` folder in the root directory of your repository. Reference them like this:
->
-> ```markdown
-> ![Alt Text](assets/image-name.png)
-> ```
+
 
 ---
 
@@ -154,12 +150,4 @@ Contributions are welcome! Please follow these steps:
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 ```
 
-### Instructions for Adding Images
-- Create an `assets` folder in your project’s root directory.
-- Place your images in this folder (e.g., `assets/profile.png`).
-- Use this syntax to reference images in your `README.md` file:
-  ```markdown
-  ![Description](assets/image-file.png)
-  ```
-  
-This code is now ready for GitHub with image references. Let me know if you need further customization!
+
