@@ -86,22 +86,22 @@ The backend handles user authentication, data storage, and file uploads. It prov
 ## Screenshots
 
 ### Profile Page
-![Profile Page](assets/profile.png)<img width="337" alt="Screenshot 2024-11-06 at 7 16 06 PM" src="https://github.com/user-attachments/assets/b6346865-2b85-4939-94d0-cb62a6b5bc73">
+<img width="337" alt="Screenshot 2024-11-06 at 7 16 06 PM" src="https://github.com/user-attachments/assets/b6346865-2b85-4939-94d0-cb62a6b5bc73">
 <img width="337" alt="Screenshot 2024-11-06 at 7 16 06 PM" src="https://github.com/user-attachments/assets/0f67ebec-3da1-4a31-b44f-4c629dc35052">
 <img width="345" alt="Screenshot 2024-11-06 at 1 37 10 PM" src="https://github.com/user-attachments/assets/01f7d553-b39f-4586-87cd-a498cd006660">
 
 <img width="345" alt="Screenshot 2024-11-06 at 1 36 50 PM" src="https://github.com/user-attachments/assets/8715aea2-aafe-48e1-8b4e-8f6b9b14ee10">
 
 ### Question Answering 
-![Question Answering](assets/question-answering.png)
+
 <img width="337" alt="Screenshot 2024-11-06 at 1 42 46 PM" src="https://github.com/user-attachments/assets/f5d214e5-da97-4869-9693-a73583bd32dd">
 
 ### Data Visualization
-![Data Visualization](assets/data-visualization.png)
+
 <img width="344" alt="Screenshot 2024-11-06 at 1 40 23 PM" src="https://github.com/user-attachments/assets/4062a44a-5f0c-47c8-a99c-de98fe0b39c1">
 
 ### Previous Comparisons
-![Previous Comparisons](assets/previous-comparisons.png)
+
 <img width="337" alt="Screenshot 2024-11-06 at 7 22 26 PM" src="https://github.com/user-attachments/assets/45b1e79d-b538-4326-b1c1-8faf35fa00a4">
 
 > **Note**: To display images in the README on GitHub, ensure that the images are stored in an `assets` folder in the root directory of your repository. Reference them like this:
