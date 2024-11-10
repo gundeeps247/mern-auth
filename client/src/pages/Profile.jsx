@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { testReportTerms } from "../pages/TestReportTerms"; // Adjust path if necessary
+
 import {
   getDownloadURL,
   getStorage,
@@ -64,7 +66,10 @@ export default function Profile() {
 
   // State to hold previous comparisons
   const [previousComparisons, setPreviousComparisons] = useState([]); // Initialize as an empty array
+  const [medicalTerms] = useState(testReportTerms); // Uses the imported terms
 
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  
   useEffect(() => {
     const fetchComparisons = async () => {
       try {
@@ -316,6 +321,20 @@ export default function Profile() {
   const handleAskllm = () => {
     navigate("/medical-query");
   };
+  const handleInputChange = (e) => {
+    const userInput = e.target.value;
+    setQuestion(userInput);
+  
+    if (userInput) {
+      const suggestions = medicalTerms.filter((term) =>
+        term.toLowerCase().startsWith(userInput.toLowerCase())
+      );
+      setFilteredSuggestions(suggestions);
+    } else {
+      setFilteredSuggestions([]); // Clear suggestions when input is empty
+    }
+  };
+  
 
   return (
     <div
@@ -407,8 +426,8 @@ export default function Profile() {
   <input
     type="text"
     value={question}
-    onChange={(e) => setQuestion(e.target.value)}
-    className="w-full bg-slate-100 rounded-lg p-3 mb-4 pr-12"  // Extra padding on the right to avoid overlap with the button
+    onChange={handleInputChange} // Updated to use handleInputChange
+    className="w-full bg-slate-100 rounded-lg p-3 mb-4 pr-12"
     placeholder="Type your question here..."
   />
   <button
@@ -417,11 +436,30 @@ export default function Profile() {
     className={`absolute right-1 top-1/2 transform -translate-y-[52%] rounded-full w-10 h-10 flex items-center justify-center ${
       isRecording ? "bg-red-500 text-white" : "bg-blue-500 text-white"
     }`}
-    style={{ right: "-1px", top: "calc(50% - 15px)" }}  // Additional adjustment
+    style={{ right: "-1px", top: "calc(50% - 15px)" }}
   >
     <i className="fas fa-microphone"></i>
   </button>
+
+  {/* Dropdown for suggestions */}
+  {filteredSuggestions.length > 0 && (
+    <ul className="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-lg z-10">
+      {filteredSuggestions.map((suggestion, index) => (
+        <li
+          key={index}
+          onClick={() => {
+            setQuestion(suggestion);
+            setFilteredSuggestions([]); // Clear suggestions after selecting one
+          }}
+          className="p-2 hover:bg-blue-500 hover:text-white cursor-pointer"
+        >
+          {suggestion}
+        </li>
+      ))}
+    </ul>
+  )}
 </div>
+
 <button
   onClick={handleAskQuestion}
   className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
@@ -430,59 +468,59 @@ export default function Profile() {
 </button>
 
 {loadingAnswer && (
-          <div className="text-center text-blue-500 mt-4">Loading answer...</div>
-        )}
+  <div className="text-center text-blue-500 mt-4">Loading answer...</div>
+)}
 
-        <button
-          onClick={handleAskllm}
-          className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
-        >
-          Ask Remedies
-        </button>
-        
+<button
+  onClick={handleAskllm}
+  className="bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+>
+  Ask Remedies
+</button>
 
-        <button
-          onClick={() => navigate("/comparisons")}
-          className="mt-5 bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
-        >
-          View Previous Comparisons
-        </button>
+<button
+  onClick={() => navigate("/comparisons")}
+  className="mt-5 bg-blue-500 text-white p-3 rounded-lg uppercase hover:opacity-95 w-full"
+>
+  View Previous Comparisons
+</button>
 
-        {/* Conditional rendering for the answer */}
-        {answer && (
-          <div className="mt-5 p-4 bg-green-100 rounded-lg">
-            <h3 className="font-semibold">Answer:</h3>
-            {typeof answer === "string" ? (
-              <p>{answer}</p>
-            ) : (
-              <div>
-                <pre>{JSON.stringify(answer, null, 2)}</pre>
-              </div>
-            )}
+{/* Conditional rendering for the answer */}
+{answer && (
+  <div className="mt-5 p-4 bg-green-100 rounded-lg">
+    <h3 className="font-semibold">Answer:</h3>
+    {typeof answer === "string" ? (
+      <p>{answer}</p>
+    ) : (
+      <div>
+        <pre>{JSON.stringify(answer, null, 2)}</pre>
+      </div>
+    )}
 
-            {/* Render the chart if chartData is available */}
-            {chartData && (
-              <div className="mt-5">
-                <Bar
-                  data={chartData}
-                  options={{
-                    scales: {
-                      y: { beginAtZero: true },
-                    },
-                    responsive: true,
-                    plugins: {
-                      legend: { position: "top" },
-                      title: {
-                        display: true,
-                        text: `${question} Levels Comparison`,
-                      },
-                    },
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        )}
+    {/* Render the chart if chartData is available */}
+    {chartData && (
+      <div className="mt-5">
+        <Bar
+          data={chartData}
+          options={{
+            scales: {
+              y: { beginAtZero: true },
+            },
+            responsive: true,
+            plugins: {
+              legend: { position: "top" },
+              title: {
+                display: true,
+                text: `${question} Levels Comparison`,
+              },
+            },
+          }}
+        />
+      </div>
+    )}
+  </div>
+)}
+
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Uploaded PDFs:</h2>
