@@ -164,3 +164,22 @@ button:hover {
   border: 1px solid #e74c3c;
   text-align: center;
 }
+.suggestions {
+  background-color: white;
+  border: 1px solid #ddd;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  top: 100%;
+  z-index: 10;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}

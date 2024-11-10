@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { medicalQuerySuggestions } from './ medicaldataset'; // Import the suggestions
 import './MedicalQueryProcessor.css';
 
 export default function MedicalQueryProcessor() {
@@ -8,7 +9,9 @@ export default function MedicalQueryProcessor() {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]); // State to store filtered suggestions
 
+  // Speech Recognition
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
@@ -86,6 +89,28 @@ export default function MedicalQueryProcessor() {
     }
   };
 
+  // Filter suggestions based on user input
+  const handleInputChange = (e) => {
+    const query = e.target.value;
+    setInput(query);
+    
+    // Filter suggestions
+    if (query.length > 0) {
+      const filtered = medicalQuerySuggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+    } else {
+      setFilteredSuggestions([]);
+    }
+  };
+
+  // Select a suggestion and populate input
+  const handleSuggestionClick = (suggestion) => {
+    setInput(suggestion);
+    setFilteredSuggestions([]); // Hide suggestions after selection
+  };
+
   return (
     <div className="medical-query-bg">
       <div className="container">
@@ -94,7 +119,7 @@ export default function MedicalQueryProcessor() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Enter your medical query"
           />
           <i
@@ -102,6 +127,21 @@ export default function MedicalQueryProcessor() {
             onClick={toggleListening}
           ></i>
           <div className="example-text">e.g., 'What are common cold flu medicines?'</div>
+
+          {/* Display filtered suggestions */}
+          {filteredSuggestions.length > 0 && (
+            <div className="suggestions">
+              {filteredSuggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <button onClick={processQuery}>Submit</button>
         {loading && <div className="loading"><div className="spinner"></div> Processing...</div>}
