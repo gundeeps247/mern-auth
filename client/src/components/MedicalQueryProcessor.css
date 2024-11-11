@@ -183,3 +183,16 @@ button:hover {
 .suggestion-item:hover {
   background-color: #f0f0f0;
 }
+.heading {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%; /* Makes sure heading takes the full width */
+  position: absolute; /* Positions the heading absolutely */
+  top: 20%; /* Adjust this to position vertically */
+  left: 50%;
+  transform: translateX(-50%); /* Centers horizontally */
+}
+

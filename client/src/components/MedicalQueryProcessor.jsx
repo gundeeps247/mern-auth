@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { medicalQuerySuggestions } from './ medicaldataset'; // Import the suggestions
+import { medicalQuerySuggestions } from '../components/ medicaldataset'; // Import the suggestions
 import './MedicalQueryProcessor.css';
 
 export default function MedicalQueryProcessor() {
@@ -11,7 +11,7 @@ export default function MedicalQueryProcessor() {
   const [isListening, setIsListening] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]); // State to store filtered suggestions
 
-  // Speech Recognition
+  // Speech Recognition setup
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
@@ -113,6 +113,8 @@ export default function MedicalQueryProcessor() {
 
   return (
     <div className="medical-query-bg">
+      <h1 className="heading">HEALTH MATRIX</h1> {/* New heading element */}
+
       <div className="container">
         <h2>Medical Query Processor</h2>
         <div className="input-group">
