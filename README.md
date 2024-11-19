@@ -1,6 +1,6 @@
-Here's the `README.md` code only. Copy and paste it as is.
+Here's the README.md code only. Copy and paste it as is.
 
-```markdown
+markdown
 # Health Matrix Project
 
 This project is an interface for managing healthcare data, allowing users to manage profiles, upload images and PDFs, ask health-related questions with AI, and view data visualizations. It includes voice-to-text capabilities for easier input, focusing on NLP for data extraction and healthcare insights through visualizations.
@@ -41,24 +41,24 @@ The Health Matrix project leverages the Hugging Face LLM model to provide a heal
 ## Project Setup
 
 1. Clone this repository:
-   ```bash
+   bash
    git clone <your-repo-url>
    cd <your-repo-name>
-   ```
+   
 
 2. Install dependencies for both frontend and backend:
-   ```bash
+   bash
    npm install
    cd client
    npm install
-   ```
+   
 
 3. Run the frontend and backend development servers:
-   ```bash
+   bash
    npm run dev   # Starts the backend
    cd client
    npm run dev   # Starts the frontend
-   ```
+   
 
 ---
 
@@ -148,6 +148,3 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-```
-
-
